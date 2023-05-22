@@ -182,16 +182,21 @@ class Hope:
 
         except TimeoutException:
             print("no cargo el selector de fecha final")
+
         #problema aquiii
         time.sleep(1)
         #intento 1
+        # os.system('pause')
+        # search = self.wait.until(ec.element_to_be_clickable(
+        #     ("css selector", "div.p-datepicker-group")))
         # search = self.wait.until(ec.element_to_be_clickable(
         #     ("css selector", "p-datepicker-today"))) # fecha actual
         # print(search.get_attribute('innerHTML'))
+
         #intento original
         search = self.driver.find_element("css selector", "td.p-datepicker-today") # fecha actual
         search.click()
-
+    
     def obtener_click(self):
         """Click en obtener"""
         search = self.driver.find_element("xpath", "//button[contains(., 'Obtener')]")
@@ -236,7 +241,7 @@ class Hope:
             # code = 8 + i * 9
             # selector = '#pv_id_' + str(code) + '_list li'
             brand.click()
-            brand.send_keys("samsung")
+            brand.send_keys(FILTRO_MARCA)
             # time.sleep(seconds)
             # search = self.driver.find_element("css selector", "ul li.p-autocomplete-item")
             # search = self.driver.find_element("css selector", selector)
