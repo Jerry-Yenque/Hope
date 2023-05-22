@@ -191,6 +191,7 @@ class Hope:
         #intento original
         search = self.driver.find_element("css selector", "td.p-datepicker-today") # fecha actual
         search.click()
+
     def obtener_click(self):
         """Click en obtener"""
         search = self.driver.find_element("xpath", "//button[contains(., 'Obtener')]")
