@@ -68,8 +68,7 @@ class Hope:
         }
         options.add_experimental_option("prefs", prefs)
         self.driver = webdriver.Chrome(
-            service=driver_service, options=options)
-        # self.driver.execute_script("document.body.style.zoom = '0.33'")
+            service=driver_service, options=options)    
         # tiempo de espera hasta que el elemento esté disponible
         self.wait = WebDriverWait(self.driver, 10)
         print("Estás seteado, ingresa el comando a realizar, por ejemplo")
@@ -223,8 +222,15 @@ class Hope:
 
     def brand(self):
         """Llenar los brand automaticamente, para filtros especificos"""
+        # brands = self.driver.find_elements("css selector", 'td[field="brand"] input')
+        wait = WebDriverWait(self.driver, 30)
+        try:
+            search = wait.until(ec.visibility_of_element_located(
+                ("css selector", 'td[field="brand"] input')))
+            # search.click()
+        except TimeoutException:
+            print("no cargo el selector")
         brands = self.driver.find_elements("css selector", 'td[field="brand"] input')
-        # i = 0
         for brand in brands:
             # code = 8 + i * 9
             # selector = '#pv_id_' + str(code) + '_list li'
@@ -237,7 +243,6 @@ class Hope:
                 search = self.wait.until(ec.element_to_be_clickable(
                     ("css selector", 'ul li.p-autocomplete-item')))
                 search.click()
-
             except TimeoutException:
                 print("no cargo el selector de fecha final")
             search.click()
@@ -259,7 +264,7 @@ if __name__ == '__main__':
     hope.filtro_marca(FILTRO_MARCA)
     hope.set_fecha()
     hope.obtener_click()
-    hope.llenar_brand()
+    hope.brand()
     os.system('pause')
     # hope.fill_brand()
 
