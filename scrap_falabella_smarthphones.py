@@ -72,7 +72,8 @@ def datos_smarphones(url):
 
 
 if __name__ == '__main__':
-    URL = "https://www.falabella.com.pe/falabella-pe/product/119684620/Reacondicionado-apple-iphone-11-128gb-a2111-purpura/119684621"
+    URL = "https://www.falabella.com.pe/falabella-pe/product/"
+    "119684620/Reacondicionado-apple-iphone-11-128gb-a2111-purpura/119684621"
 
     datos = datos_smarphones(URL)
     for clave, valor in datos.items():
