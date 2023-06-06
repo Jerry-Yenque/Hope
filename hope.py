@@ -1,7 +1,7 @@
 """Welcome to HopeBot, this is the last hope project"""
 import os
 import time
-# from webdriver_manager.chrome import ChromeDriverManager #para descar por code el manager
+from webdriver_manager.chrome import ChromeDriverManager #para descar por code el manager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
@@ -25,14 +25,15 @@ class Hope:
         self.retails = FILTRO_RETAIL
         self.categorias = FILTRO_CATEGORIA
         self.marcas = FILTRO_MARCA
+        self.division = FILTRO_DIVISION
 
         self.finder = finder.Finder()
         # end VARIABLES
 
-        ruta_driver = r'C:\Program Files (x86)\chromedriver.exe'
+        # ruta_driver = r'C:\Program Files (x86)\chromedriver.exe'
         # Instalación de ChromeDriver, devuelve la ruta completa
         # (si ya esta instalado solo devuelve la ruta)
-        # ruta_driver = ChromeDriverManager(path="./chromedriver").install()
+        ruta_driver = ChromeDriverManager(path="./chromedriver").install()
         # Creamos y asignamos la variable a un objeto Service que contiene la ruta del webdriver
         driver_service = Service(ruta_driver)
         # Establecer las opciones del navegador
@@ -85,18 +86,21 @@ class Hope:
         " a la brevedad posible")
         self.login()
 
-    def setRetails(self, retails): # pylint: disable=C0103
+    def setRetail(self, retails): # pylint: disable=C0103
         """Se espera un arreglo de los retails para usar como filtro"""
         self.retails = retails
-    def setCategorias(self, categorias): # pylint: disable=c0103
+    def setCategoria(self, categorias): # pylint: disable=c0103
         """Se espera un arreglo de las categorias para usar como filtro"""
         self.categorias = categorias
-    def setMarcas(self, marcas): # pylint: disable=c0103
+    def setMarca(self, marcas): # pylint: disable=c0103
         """Se espera un arreglo de las marcas para usar como filtro"""
         self.marcas = marcas
     def addMarca(self, newMarca): # pylint: disable=c0103
         """Agregar un marca al arreglo de marcas para filtro"""
         self.marcas.append(newMarca)
+    def setDivision(self, divisiones): # pylint: disable=c0103
+        """Se espera un arreglo de las divisioens para usar como filtro"""
+        self.division = divisiones
 
     def login(self, email=EMAIL, clave=CLAVE):
         """ Acceso automatico """
@@ -149,14 +153,16 @@ class Hope:
         search.click()
         return 1
 
-    def filtro_division(self, division=FILTRO_DIVISION):
+    def filtro_division(self, division=None):
         """LLenado del filtro division"""
+        if division is None:
+            division = self.division
         search = self.driver.find_element(
             "css selector", 'input[placeholder="Division"] + button')
         search.click()
         try:
             search = self.wait.until(ec.element_to_be_clickable(
-                ("xpath", f"//li[contains(text(), '{division}')]")))
+                ("xpath", f"//li[contains(text(), '{division[0]}')]"))) #encerrar en un for el try para acceder al arreglo
         except TimeoutException:
             print(f"fitro {division} no cargó")
             return -1
@@ -190,13 +196,13 @@ class Hope:
             categorias = self.categorias
         search = self.driver.find_elements("css selector", "div.p-multiselect-label")[1]
         search.click()
-        for categorias in categorias:
+        for categoria in categorias:
             try:
                 search = self.wait.until(ec.element_to_be_clickable(
-                    ("xpath", f"//li[@aria-label='{categorias}']")))
+                    ("xpath", f"//li[@aria-label='{categoria}']")))
                 search.click()
             except TimeoutException:
-                print(f"fitro {categorias} no cargó")
+                print(f"fitro {categoria} no cargó")
                 return -1
         search = self.driver.find_elements("css selector", "div.p-multiselect-label")[1]
         search.click()
@@ -286,34 +292,35 @@ class Hope:
         """Get ready for action marketplace"""
         self.taxonomia_taxonomizado_click()
         self.filtro_pais(FILTRO_PAIS)
-        self.filtro_retail(FILTRO_RETAIL)
+        self.filtro_retail(self.retails)
         self.filtro_area(FILTRO_AREA)
-        self.filtro_division(FILTRO_DIVISION)
-        self.filtro_categoria(FILTRO_CATEGORIA)
+        self.filtro_division(self.division)
+        self.filtro_categoria(self.categorias)
         self.obtener_click()
         print("Ahora estás listo para Marketplacear, te recomiendo el método (por implementar)")
 
 
-    def fill_market(self):
+    def fill_market(self, nrow=None):
         """Hope empezará a trabajar el marketplace en la pagina actual"""
         wait = WebDriverWait(self.driver, 30)
         try:
             wait.until(ec.visibility_of_element_located(("css selector", "tbody"))) # pylint: disable=c0301
-            print('paso linea 301')
         except TimeoutException:
-            print("Carga de espera excedida")
+            print("Timeout: No cargó la tabla")
+            return -1
         search = self.driver.find_elements('css selector', "tbody tr")
+        if nrow is not None:
+            search = list(search[nrow])
         for row in search:
             row.find_element("css selector", "div[tabindex='0']").click()
             seller = row.find_element("css selector", 'input[placeholder="Feature 5"]')
-            print(seller.get_attribute('outerHTML'))
             seller.click()
             seller.send_keys(Keys.CONTROL + 'a')
             name = seller.get_attribute("value") #pylint: disable=c0301
             # Boton editar
             if name != '':
                 print(name)
-                row.find_element("css selector", "div[tabindex='0']").click()
+                row.find_element("css selector", "div[tabindex='0']").click() # btn editar
             else:
                 print('No hay name')
                 url = row.find_element("css selector", "a").get_attribute('href')
@@ -322,13 +329,40 @@ class Hope:
                     print(data['productSeller'])
                     seller.click()
                     seller.send_keys(data['productSeller'])
+                    time.sleep(2)
+                    try:
+                        row.find_element("css selector", ".p-autocomplete-panel").click()
+                    except Exception as error: #pylint: disable=W0718
+                        print("Nombre sin autocompletar", name, error)
+                        self.driver.execute_script("arguments[0].style.color = 'yellow';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                        row.find_element('css selector', 'td[field="nombre"]'))
+                    else:
+                        self.driver.execute_script("arguments[0].style.color = '#2bbd1c';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                        row.find_element('css selector', 'td[field="nombre"]'))
+                        try:
+                            time.sleep(2)
+                            row.find_element('css selector', '.ml-1').click()
+                        except Exception as error: #pylint: disable=W0718
+                            print('No se pudo dar click a confirmar', error)
+                            self.driver.execute_script("arguments[0].style.color = 'yellow';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                        row.find_element('css selector', 'td[field="nombre"]'))
+                        else:
+                            print('Market done')
+
                 elif data['status_code'] != 200:
                     print('404')
                     seller.click()
                     seller.send_keys('404')
+                    self.driver.execute_script("arguments[0].style.color = 'red';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                        row.find_element('css selector', 'td[field="nombre"]'))
                 else:
                     seller.click()
                     seller.send_keys('Sin seller')
+        return 1
 
 
     def brand(self, marcas=None):

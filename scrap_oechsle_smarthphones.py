@@ -47,7 +47,7 @@ def datos_smarphones(url):
 
     if data['productSeller'] is None:
         try:
-            data['productSeller'] = soup.find('div', {'data-js': 'marketplace-2'}).find('img')['alt']
+            data['productSeller'] = soup.find('div', {'data-js': 'marketplace-2'}).find('img')['alt'] #pylint: disable=c0301
         except Exception as e: #pylint: disable=c0103, w0718
             print('no img', e)
 
