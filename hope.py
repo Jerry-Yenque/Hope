@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait # para esperar por elementos en selenium
 from selenium.webdriver.support import expected_conditions as ec # para condiciones en selinium
-from selenium.common.exceptions import TimeoutException # excepcion de timeout en selenium
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 import finder
 from variables import EMAIL, CLAVE, FILTRO_PAIS, FILTRO_RETAIL, FILTRO_AREA , FILTRO_DIVISION, FILTRO_CATEGORIA, FILTRO_MARCA # pylint: disable=C0301
@@ -25,7 +25,8 @@ class Hope:
         self.retails = FILTRO_RETAIL
         self.categorias = FILTRO_CATEGORIA
         self.marcas = FILTRO_MARCA
-        self.division = FILTRO_DIVISION
+        self.divisiones = FILTRO_DIVISION
+        self.areas = FILTRO_AREA
 
         self.finder = finder.Finder()
         # end VARIABLES
@@ -85,7 +86,7 @@ class Hope:
         print("El metodo .ready() te llevará a taxonomizar segun tus parametros pre establecidos"
         " a la brevedad posible")
         self.login()
-
+    # Getters and Setters
     def setRetail(self, retails): # pylint: disable=C0103
         """Se espera un arreglo de los retails para usar como filtro"""
         self.retails = retails
@@ -100,7 +101,11 @@ class Hope:
         self.marcas.append(newMarca)
     def setDivision(self, divisiones): # pylint: disable=c0103
         """Se espera un arreglo de las divisioens para usar como filtro"""
-        self.division = divisiones
+        self.divisiones = divisiones
+    def setArea(self, areas): # pylint: disable=c0103
+        """Se espera un arreglo de las áreas para usar como filtro"""
+        self.areas = areas
+    # end Getters and Setters
 
     def login(self, email=EMAIL, clave=CLAVE):
         """ Acceso automatico """
@@ -139,42 +144,44 @@ class Hope:
         search.click()
         return 1
 
-    def filtro_area(self, area=FILTRO_AREA):
-        """LLenado del filtro area"""
+    def filtro_area(self, areas=None):
+        """LLenado del filtro areas"""
+        if areas is None:
+            areas = self.areas
         search = self.driver.find_element(
             "css selector", 'input[placeholder="Area"] + button')
         search.click()
         try:
             search = self.wait.until(ec.element_to_be_clickable(
-                ("xpath", f"//li[contains(text(), '{area}')]")))
+                ("xpath", f"//li[contains(text(), '{areas}')]")))
         except TimeoutException:
-            print(f"fitro {area} no cargó")
+            print(f"fitro {areas} no cargó")
             return -1
         search.click()
         return 1
 
-    def filtro_division(self, division=None):
-        """LLenado del filtro division"""
-        if division is None:
-            division = self.division
+    def filtro_division(self, divisiones=None):
+        """LLenado del filtro divisiones"""
+        if divisiones is None:
+            divisiones = self.divisiones
         search = self.driver.find_element(
             "css selector", 'input[placeholder="Division"] + button')
         search.click()
         try:
             search = self.wait.until(ec.element_to_be_clickable(
-                ("xpath", f"//li[contains(text(), '{division[0]}')]"))) #encerrar en un for el try para acceder al arreglo
+                ("xpath", f"//li[contains(text(), '{divisiones[0]}')]"
+                 ))) #encerrar en un for el try para acceder al arreglo
         except TimeoutException:
-            print(f"fitro {division} no cargó")
+            print(f"fitro {divisiones} no cargó")
             return -1
         search.click()
         return 1
 
-    def filtro_retail(self, retails=None):
+    def __filtro_retail(self, retails=None):
         """LLenado del filtro retail"""
         if retails is None:
             retails = self.retails
-        search = self.driver.find_element("css selector", "div.p-multiselect-label")
-        search.click()
+        self.driver.find_element("css selector", "div.p-multiselect-label").click()
         for retail in retails:
             try:
                 search = self.wait.until(ec.element_to_be_clickable(
@@ -234,11 +241,6 @@ class Hope:
             search.click()
         except TimeoutException:
             print("fecha no cargo")
-        # search = self.driver.find_elements("css selector", "input.p-inputtext")[1]
-        # search.click()
-        #primero del mes
-        # search = self.driver.find_element("xpath", "//table[@class='p-datepicker-calendar']"
-        #                                   "//span[text()='1']")
         try:
             search = self.wait.until(ec.element_to_be_clickable(
                 ("xpath", "//table[@class='p-datepicker-calendar']//span[text()='1']")))
@@ -280,7 +282,7 @@ class Hope:
         """Get ready for action Smartphones samsung"""
         self.taxonomia_pendiente_click()
         self.filtro_pais(FILTRO_PAIS)
-        self.filtro_retail(self.retails)
+        self.__filtro_retail(self.retails)
         self.filtro_categoria(self.categorias)
         self.filtro_marca(self.marcas)
         self.set_fecha()
@@ -292,12 +294,12 @@ class Hope:
         """Get ready for action marketplace"""
         self.taxonomia_taxonomizado_click()
         self.filtro_pais(FILTRO_PAIS)
-        self.filtro_retail(self.retails)
+        self.__filtro_retail(self.retails)
         self.filtro_area(FILTRO_AREA)
-        self.filtro_division(self.division)
+        self.filtro_division()
         self.filtro_categoria(self.categorias)
         self.obtener_click()
-        print("Ahora estás listo para Marketplacear, te recomiendo el método (por implementar)")
+        print("HOPE: Ahora estás listo para Marketplacear, te recomiendo el método .fill_market()")
 
 
     def fill_market(self, nrow=None):
@@ -312,38 +314,44 @@ class Hope:
         if nrow is not None:
             search = list(search[nrow])
         for row in search:
-            row.find_element("css selector", "div[tabindex='0']").click()
+            row.find_element("css selector", "div[tabindex='0']").click() #btn editar
             seller = row.find_element("css selector", 'input[placeholder="Feature 5"]')
             seller.click()
             seller.send_keys(Keys.CONTROL + 'a')
             name = seller.get_attribute("value") #pylint: disable=c0301
             # Boton editar
             if name != '':
-                print(name)
+                print(f"HOPE: Esta fila ya está hecha con Feature 5 = {name}\n")
                 row.find_element("css selector", "div[tabindex='0']").click() # btn editar
             else:
-                print('No hay name')
+                print('HOPE: Feature 5 sin completar. Se realizará la petición a The Finder')
                 url = row.find_element("css selector", "a").get_attribute('href')
                 data = self.finder.data_oechsle(url)
                 if (data['status_code'] == 200) and (data['productSeller'] is not None):
-                    print(data['productSeller'])
+                    print(f"THE FINDER: Encontré al vendedor = {data['productSeller']}")
                     seller.click()
                     seller.send_keys(data['productSeller'])
                     time.sleep(2)
                     try:
                         row.find_element("css selector", ".p-autocomplete-panel").click()
-                    except Exception as error: #pylint: disable=W0718
-                        print("Nombre sin autocompletar", name, error)
+                    except NoSuchElementException: #pylint: disable=W0718
+                        print(f"HOPE: Nombre '{data['productSeller']}'"
+                              "no tiene autocompletar\n")
                         self.driver.execute_script("arguments[0].style.color = 'yellow';"
                                                    "arguments[0].style.fontWeight = '900';",
                                         row.find_element('css selector', 'td[field="nombre"]'))
+                        if data['productSeller'] == 'Plazavea':
+                            self.driver.execute_script("arguments[0].style.color = 'red';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                        row.find_element('css selector', 'td[field="nombre"]'))
+
                     else:
                         self.driver.execute_script("arguments[0].style.color = '#2bbd1c';"
                                                    "arguments[0].style.fontWeight = '900';",
                                         row.find_element('css selector', 'td[field="nombre"]'))
                         try:
                             time.sleep(2)
-                            row.find_element('css selector', '.ml-1').click()
+                            row.find_element('css selector', '.ml-1').click() # btn Descartar
                         except Exception as error: #pylint: disable=W0718
                             print('No se pudo dar click a confirmar', error)
                             self.driver.execute_script("arguments[0].style.color = 'yellow';"
@@ -359,10 +367,16 @@ class Hope:
                     self.driver.execute_script("arguments[0].style.color = 'red';"
                                                    "arguments[0].style.fontWeight = '900';",
                                         row.find_element('css selector', 'td[field="nombre"]'))
+                    row.find_element("css selector", "div[tabindex='0']").click() #btn editar
+                    time.sleep(2)
+                    row.find_element('css selector', '.ml-1').click() # btn Descartar
+                    # Ocultar el elemento utilizando JavaScript
+                    self.driver.execute_script("arguments[0].style.display = 'none';", row)
                 else:
                     seller.click()
                     seller.send_keys('Sin seller')
         return 1
+    # Private Methods
 
 
     def brand(self, marcas=None):

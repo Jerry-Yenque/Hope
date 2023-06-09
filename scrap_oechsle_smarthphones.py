@@ -26,15 +26,11 @@ def datos_smarphones(url):
 
     # crear el objeto bs4 a partir del código HTML
     soup = BeautifulSoup(req.text, "html.parser")
-    # obteniendo datos
+    # Obteniendo datos
     # url del producto
     data["url"] = req.url
+    # código de respuesta
     data ['status_code'] = req.status_code
-    # id del producto en la web del scrapping(oechsle) no implementado
-    # #ya que su link no contiene el id
-    # pero implementado capturando un elemento del html
-    # data["id"] = data["url"].split("/")[-1]
-    #implementacion nueva
     seller, codigo = None, None
     try:
         seller, codigo = soup.find("div", class_="skuReference").text.split("-")
@@ -54,8 +50,11 @@ def datos_smarphones(url):
     # nombre del producto
     data["productName"] = soup.find("h1", attrs={"itemprop": "name"}).text.strip()
     # precio del producto
-    data["productPrice"] = float(soup.find("strong", class_="skuBestPrice").text
-                                 .replace("S/.", "").strip().replace(",", ""))
+    try:
+        data["productPrice"] = float(soup.find("strong", class_="skuBestPrice").text
+                                    .replace("S/.", "").strip().replace(",", ""))
+    except Exception as error: # pylint: disable=W0718
+        print("-Hope: No encontré el precio del producto\n", error)
     # descuento del producto
     try:
         data["productDiscount"] = float(soup.find(
