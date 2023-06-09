@@ -82,9 +82,9 @@ class Hope:
             service=driver_service, options=options)
         # tiempo de espera hasta que el elemento esté disponible
         self.wait = WebDriverWait(self.driver, 10)
-        print("Estás seteado, ingresa el comando a realizar, por ejemplo")
-        print("El metodo .ready() te llevará a taxonomizar segun tus parametros pre establecidos"
-        " a la brevedad posible")
+        print("HOPE: Hola!, cómo puedo ayudarte?\n")
+        print("El método .taxonomizar() te llevará a taxonomizar según tus filtros pre establecidos") # pylint: disable=C0301
+        print("El método .marketplace() te llevará a marketplacear según tus filtros pre establecidos") #pylint: disable=C0301
         self.login()
     # Getters and Setters
     def setRetail(self, retails): # pylint: disable=C0103
@@ -130,7 +130,7 @@ class Hope:
         self.driver.get(
             "https://to-platform-v2-pd.lexartlabs.com/#/taxonomia/taxonomizado")
 
-    def filtro_pais(self, pais=FILTRO_PAIS):
+    def __filtro_pais(self, pais=FILTRO_PAIS):
         """LLenado del filtro pais"""
         search = self.driver.find_element(
             "css selector", "div.custom-dropdown")
@@ -281,7 +281,7 @@ class Hope:
     def taxonomizar(self):
         """Get ready for action Smartphones samsung"""
         self.taxonomia_pendiente_click()
-        self.filtro_pais(FILTRO_PAIS)
+        self.__filtro_pais(FILTRO_PAIS)
         self.__filtro_retail(self.retails)
         self.filtro_categoria(self.categorias)
         self.filtro_marca(self.marcas)
@@ -293,7 +293,7 @@ class Hope:
     def marketplace(self):
         """Get ready for action marketplace"""
         self.taxonomia_taxonomizado_click()
-        self.filtro_pais(FILTRO_PAIS)
+        self.__filtro_pais(FILTRO_PAIS)
         self.__filtro_retail(self.retails)
         self.filtro_area(FILTRO_AREA)
         self.filtro_division()
