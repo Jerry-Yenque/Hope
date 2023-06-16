@@ -34,7 +34,7 @@ class Hope:
         # ruta_driver = r'C:\Program Files (x86)\chromedriver.exe'
         # Instalación de ChromeDriver, devuelve la ruta completa
         # (si ya esta instalado solo devuelve la ruta)
-        ruta_driver = ChromeDriverManager(path="./chromedriver").install()
+        ruta_driver =     ChromeDriverManager(path="./chromedriver").install()
         # Creamos y asignamos la variable a un objeto Service que contiene la ruta del webdriver
         driver_service = Service(ruta_driver)
         # Establecer las opciones del navegador
