@@ -34,7 +34,7 @@ class Hope:
         # ruta_driver = r'C:\Program Files (x86)\chromedriver.exe'
         # Instalación de ChromeDriver, devuelve la ruta completa
         # (si ya esta instalado solo devuelve la ruta)
-        ruta_driver =     ChromeDriverManager(path="./chromedriver").install()
+        ruta_driver = ChromeDriverManager(path="./chromedriver").install()
         # Creamos y asignamos la variable a un objeto Service que contiene la ruta del webdriver
         driver_service = Service(ruta_driver)
         # Establecer las opciones del navegador
@@ -326,7 +326,10 @@ class Hope:
             else:
                 print('HOPE: Feature 5 sin completar. Se realizará la petición a The Finder')
                 url = row.find_element("css selector", "a").get_attribute('href')
-                data = self.finder.data_oechsle(url)
+                if 'simple.ripley' in url:
+                    data = self.finder.data_ripley(url)
+                else:
+                    data = self.finder.data_oechsle(url)
                 if (data['status_code'] == 200) and (data['productSeller'] is not None):
                     print(f"THE FINDER: Encontré al vendedor = {data['productSeller']}")
                     seller.click()

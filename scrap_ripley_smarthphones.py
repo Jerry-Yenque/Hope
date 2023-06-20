@@ -8,7 +8,7 @@ GRIS = "\33[0;37m"  # texto gris
 BLANCO = "\33[1;37m"  # texto blanco
 
 
-def datos_smarphones(url):
+def datos_ripley(url):
     """Devuelve los datos para smartphone en las web de ripley"""
 
     # inicialización del diccionario de salida
@@ -42,18 +42,25 @@ def datos_smarphones(url):
     # nombre del producto
     data["productName"] = soup.find("section", class_="product-header").find("h1").text.strip()
     # precio del producto
-    prices_section = soup.find("dl", class_="prices-list")
-    price_elements = prices_section.find_all("dt", class_="product-price")
+    try:
+        prices_section = soup.find("dl", class_="prices-list")
+        price_elements = prices_section.find_all("dt", class_="product-price")
+    except Exception:
+        print('price table error')
 
-    data["productPrice"] = float(price_elements[1].text.replace("S/", "").strip().replace(",", ""))
-    data["productPriceOld"] = float(price_elements[0].text.replace("S/", "").strip()
+    try:
+        data["productPrice"] = float(price_elements[1].text.replace("S/", "").strip()
+                                     .replace(",", ""))
+        data["productPriceOld"] = float(price_elements[0].text.replace("S/", "").strip()
                                     .replace(",", ""))
-    data["productDiscount"] = data["productPriceOld"] - data["productPrice"]
+        data["productDiscount"] = data["productPriceOld"] - data["productPrice"]
+    except IndexError:
+        print('Price Error')
     return data
 
 
 if __name__ == '__main__':
     URL = "https://simple.ripley.com.pe/televisor-hisense-32-smart-tv-hd-led-32a4gsv-pmp00002088326?color_80=negro&s=mdco"
-    datos = datos_smarphones(URL)
+    datos = datos_ripley(URL)
     for clave, valor in datos.items():
         print(f'{AZUL}{clave.upper()}: {BLANCO}{valor}{GRIS}')

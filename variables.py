@@ -13,22 +13,22 @@ FILTRO_AREA = "electro"
 
 # Categorias para aspiradoras: 'aspiradoras', 'aspiradoras de robot', 'aspiradoras robot', 'aspiradoras verticales', # pylint: disable=C0301
 #       'aspiradoras de tambor', 'aspiradoras portátiles'
-# Categorias para celulares: 'celulares'    
+# Categorias para celulares: 'celulares'
 # Categorias para computo: 'tablets'
 # Categorias para audio: 'audifonos', 'audífonos gamer', 'audifonos y manos libres'
 # Categorias para video: 'tv', 'monitores'
-FILTRO_CATEGORIA = ['audifonos', 'audífonos gamer', 'audifonos y manos libres']
-# FILTRO_CATEGORIA = ['olla arrocera']
+# FILTRO_CATEGORIA = ['audifonos', 'audífonos gamer', 'audifonos y manos libres']
+FILTRO_CATEGORIA = ['colchones']
 
 # divisiones : 'telefonia', 'computo', 'audio', 'video'
-FILTRO_DIVISION = ['audio']
+FILTRO_DIVISION = ['celulares']
 # FILTRO_DIVISION = ['peds']
 
 # Marcas para tablets = 'samsung'
 # Marcas para aspiradoras, 'DEERMA', 'irobot', 'karcher', 'electrolux'
 # Marcas audifonos : 'samsung', 'sony', 'xiaomi', 'lenovo'
 # Marcas para monitores : 'lg', 'hp'
-FILTRO_MARCA = [""]
+FILTRO_MARCA = ["paraiso"]
 
 
 dictSeller = { 'ElectronicStore': 'ElectronicsStore',
