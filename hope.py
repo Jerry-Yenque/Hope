@@ -212,23 +212,23 @@ class Hope:
         search.click()
         return 1
 
-    def __filtro_marca(self, marcas = None):
-        """Llenado del filtro marcas"""
-        if marcas is None:
-            marcas = self.marcas
-        search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
-        search.click()
-        for marca in marcas:
-            try:
-                search = self.wait.until(ec.element_to_be_clickable(
-                    ("xpath", f"//li[@aria-label='{marca}']")))
-                search.click()
-            except TimeoutException:
-                print(f"fitro {marca} no cargó")
-                return -1
-        search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
-        search.click()
-        return 1
+    # def __filtro_marca(self, marcas = None):
+    #     """Llenado del filtro marcas"""
+    #     if marcas is None:
+    #         marcas = self.marcas
+    #     search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
+    #     search.click()
+    #     for marca in marcas:
+    #         try:
+    #             search = self.wait.until(ec.element_to_be_clickable(
+    #                 ("xpath", f"//li[@aria-label='{marca}']")))
+    #             search.click()
+    #         except TimeoutException:
+    #             print(f"fitro {marca} no cargó")
+    #             return -1
+    #     search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
+    #     search.click()
+    #     return 1
 
     def set_fecha(self):
         """Seteamos fecha inicio y fecha final"""
@@ -281,11 +281,10 @@ class Hope:
         self.__filtro_pais(FILTRO_PAIS)
         self.__filtro_retail(self.retails)
         self.__filtro_categoria(self.categorias)
-        self.__filtro_marca(self.marcas)
         self.set_fecha()
         self.obtener_click()
-        print("Ahora estás listo para taxonomizar, te recomiendo el método .brand")
-        print("Automaticamente te llenará los brand, sin mayor esfuerzo")
+        print(f"{AZUL}HOPE: {BLANCO}Ahora estás listo para taxonomizar, te recomiendo el método .brand") # pylint: disable=C0301
+        print(f"\tAutomaticamente te llenará los brand, sin mayor esfuerzo{GRIS}\n")
 
     def marketplace(self):
         """ Get ready for action marketplace """
@@ -380,11 +379,44 @@ class Hope:
     # Private Methods
 
 
-    def brand(self, marcas=None):
+    def brand(self):
+        """ Llenar los brand automaticamente, para taxonomizado general """
+        wait = WebDriverWait(self.driver, 30)
+        try:
+            # search = wait.until(ec.visibility_of_element_located(
+            search = wait.until(ec.visibility_of_all_elements_located(
+                ("css selector", 'td[field="brand"] input')))
+        except TimeoutException:
+            print(f"{AZUL}HOPE: {BLANCO}No ubico los campos brand, I can't see them{GRIS}")
+        else:
+            # brands = self.driver.find_elements("css selector", 'td[field="brand"] input')
+            for valor, brand, row in zip(
+                    self.driver.find_elements("css selector", 'td[field="brand"] div.p-chip-text'),
+                    self.driver.find_elements("css selector", 'td[field="brand"] input'),
+                    self.driver.find_elements('css selector', 'tbody tr')):
+                brand.click()
+                print(valor.text)
+                brand.send_keys(valor.text)
+                try:
+                    wait = WebDriverWait(self.driver, 3)
+                    search = wait.until(ec.element_to_be_clickable(
+                        ("xpath", f"//ul/li[contains(@class, 'p-autocomplete-item') and text() = ' {valor.text} ']"))) # pylint: disable=C0301
+                except TimeoutException:
+                    print(f"{AZUL}HOPE: {ROJO}No tiene automcopletar o no coincide con el de la web{GRIS}\n") # pylint: disable=C0301
+                    self.driver.execute_script("arguments[0].style.color = 'red';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                    row.find_element('css selector', 'td[field="nombre"]'))
+                else:
+                    search.click()
+                    self.driver.execute_script("arguments[0].style.color = 'green';"
+                                                   "arguments[0].style.fontWeight = '900';",
+                                    row.find_element('css selector', 'td[field="nombre"]'))
+            print(f"{AZUL}HOPE: {BLANCO}Listo ahi tienes el brand hecho, moderfoca{GRIS}")
+
+    def brand_marca(self, marcas=None):
         """ Llenar los brand automaticamente, para filtros especificos """
         if marcas is None:
             marcas = self.marcas
-        # brands = self.driver.find_elements("css selector", 'td[field="brand"] input')
         wait = WebDriverWait(self.driver, 30)
         try:
             search = wait.until(ec.visibility_of_element_located(
@@ -419,4 +451,5 @@ class Hope:
 if __name__ == '__main__':
     hope = Hope()
     hope.taxonomizar()
+    hope.brand()
     os.system('pause')

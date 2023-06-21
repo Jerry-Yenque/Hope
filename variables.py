@@ -18,11 +18,11 @@ FILTRO_AREA = "electro"
 # Categorias para audio: 'audifonos', 'audífonos gamer', 'audifonos y manos libres'
 # Categorias para video: 'tv', 'monitores'
 # FILTRO_CATEGORIA = ['audifonos', 'audífonos gamer', 'audifonos y manos libres']
-FILTRO_CATEGORIA = ['olla arrocera']
+FILTRO_CATEGORIA = ['celulares']
 
 # divisiones : 'telefonia', 'computo', 'audio', 'video'
 # FILTRO_DIVISION = ['celulares']
-FILTRO_DIVISION = ['peds']
+FILTRO_DIVISION = ['celulares']
 
 # Marcas para tablets = 'samsung'
 # Marcas para aspiradoras, 'DEERMA', 'irobot', 'karcher', 'electrolux'
