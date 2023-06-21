@@ -45,7 +45,7 @@ def datos_ripley(url):
     try:
         prices_section = soup.find("dl", class_="prices-list")
         price_elements = prices_section.find_all("dt", class_="product-price")
-    except Exception:
+    except Exception: # pylint: disable=W0718
         print('price table error')
 
     try:

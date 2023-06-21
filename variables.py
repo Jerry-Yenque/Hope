@@ -18,17 +18,17 @@ FILTRO_AREA = "electro"
 # Categorias para audio: 'audifonos', 'audífonos gamer', 'audifonos y manos libres'
 # Categorias para video: 'tv', 'monitores'
 # FILTRO_CATEGORIA = ['audifonos', 'audífonos gamer', 'audifonos y manos libres']
-FILTRO_CATEGORIA = ['colchones']
+FILTRO_CATEGORIA = ['olla arrocera']
 
 # divisiones : 'telefonia', 'computo', 'audio', 'video'
-FILTRO_DIVISION = ['celulares']
-# FILTRO_DIVISION = ['peds']
+# FILTRO_DIVISION = ['celulares']
+FILTRO_DIVISION = ['peds']
 
 # Marcas para tablets = 'samsung'
 # Marcas para aspiradoras, 'DEERMA', 'irobot', 'karcher', 'electrolux'
 # Marcas audifonos : 'samsung', 'sony', 'xiaomi', 'lenovo'
 # Marcas para monitores : 'lg', 'hp'
-FILTRO_MARCA = ["paraiso"]
+FILTRO_MARCA = [""]
 
 
 dictSeller = { 'ElectronicStore': 'ElectronicsStore',

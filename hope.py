@@ -1,7 +1,7 @@
 """Welcome to HopeBot, this is the last hope project"""
 import os
 import time
-from webdriver_manager.chrome import ChromeDriverManager #para descar por code el manager
+from webdriver_manager.chrome import ChromeDriverManager #para descargar por code el Driver
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
@@ -14,9 +14,13 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import finder
 from variables import EMAIL, CLAVE, FILTRO_PAIS, FILTRO_RETAIL, FILTRO_AREA , FILTRO_DIVISION, FILTRO_CATEGORIA, FILTRO_MARCA # pylint: disable=C0301
 
+AZUL = "\33[1;36m"  # texto azul claro
+GRIS = "\33[0;37m"  # texto gris
+BLANCO = "\33[1;37m"  # texto blanco
+ROJO = "\33[1;31m"
+
 class Hope:
     """ Clase que representa el bot de 'The last hope project' """
-
     def __init__(self):
         os.system('cls')
         print("\n\nBienvenido a The last Hope Project, un bot asistente"
@@ -82,9 +86,9 @@ class Hope:
             service=driver_service, options=options)
         # tiempo de espera hasta que el elemento esté disponible
         self.wait = WebDriverWait(self.driver, 10)
-        print("HOPE: Hola!, cómo puedo ayudarte?\n")
-        print("El método .taxonomizar() te llevará a taxonomizar según tus filtros pre establecidos") # pylint: disable=C0301
-        print("El método .marketplace() te llevará a marketplacear según tus filtros pre establecidos") #pylint: disable=C0301
+        print(f"{AZUL}HOPE: {BLANCO}Hola!, cómo puedo ayudarte?{GRIS}")
+        print(f"{BLANCO}\tEl método .taxonomizar() te llevará a taxonomizar según tus filtros pre establecidos") # pylint: disable=C0301
+        print(f"\tEl método .marketplace() te llevará a marketplacear según tus filtros pre establecidos{GRIS}\n") #pylint: disable=C0301
         self.login()
     # Getters and Setters
     def setRetail(self, retails): # pylint: disable=C0103
@@ -110,25 +114,18 @@ class Hope:
     def login(self, email=EMAIL, clave=CLAVE):
         """ Acceso automatico """
         self.driver.get("https://to-platform-v2-pd.lexartlabs.com/#/login")
-        search = self.driver.find_element("css selector", "#login")
-        search.send_keys(email)
-        search = self.driver.find_element("css selector", "#password")
-        search.send_keys(clave)
-        search = self.driver.find_element("xpath", '//input[@value="Log In"]')
-        search.send_keys(Keys.RETURN)
+        self.driver.find_element("css selector", "#login").send_keys(email)
+        self.driver.find_element("css selector", "#password").send_keys(clave)
+        self.driver.find_element("xpath", '//input[@value="Log In"]').send_keys(Keys.RETURN)
 
-    def taxonomia_pendiente_click(self):
-        """ Click para ir a la tabla de pendientes a taxonomizar """
-        # Puede mejorar a esperar que cargue el boton y darle click
-        time.sleep(1)
-        self.driver.get(
-            "https://to-platform-v2-pd.lexartlabs.com/#/taxonomia/pendiente")
-    def taxonomia_taxonomizado_click(self):
-        """ Click para ir a la tabla de pendientes a taxonomizar """
-        # Puede mejorar a esperar que cargue el boton y darle click
-        time.sleep(1)
-        self.driver.get(
-            "https://to-platform-v2-pd.lexartlabs.com/#/taxonomia/taxonomizado")
+    def __nav_click(self, section, item):
+        """ Dar click de acuerdo a la sección y a su item """
+        try:
+            self.wait.until(ec.presence_of_all_elements_located(('css selector', 'p[data-v-f95f071e]'))) # pylint: disable=C0301
+        except TimeoutException:
+            print(f"{AZUL}HOPE: {BLANCO}Tiempo de espera para click en pendiente agotado.{GRIS}")
+        else:
+            self.driver.get(f"https://to-platform-v2-pd.lexartlabs.com/#/{section}/{item}")
 
     def __filtro_pais(self, pais=FILTRO_PAIS):
         """LLenado del filtro pais"""
@@ -144,7 +141,7 @@ class Hope:
         search.click()
         return 1
 
-    def filtro_area(self, areas=None):
+    def __filtro_area(self, areas=None):
         """LLenado del filtro areas"""
         if areas is None:
             areas = self.areas
@@ -160,7 +157,7 @@ class Hope:
         search.click()
         return 1
 
-    def filtro_division(self, divisiones=None):
+    def __filtro_division(self, divisiones=None):
         """LLenado del filtro divisiones"""
         if divisiones is None:
             divisiones = self.divisiones
@@ -197,7 +194,7 @@ class Hope:
         search.click()
         return 1
 
-    def filtro_categoria(self, categorias=None):
+    def __filtro_categoria(self, categorias=None):
         """Llenado del filtro categorias"""
         if categorias is None:
             categorias = self.categorias
@@ -215,7 +212,7 @@ class Hope:
         search.click()
         return 1
 
-    def filtro_marca(self, marcas = None):
+    def __filtro_marca(self, marcas = None):
         """Llenado del filtro marcas"""
         if marcas is None:
             marcas = self.marcas
@@ -280,24 +277,25 @@ class Hope:
 
     def taxonomizar(self):
         """Get ready for action Smartphones samsung"""
-        self.taxonomia_pendiente_click()
+        self.__nav_click('taxonomia', 'pendiente')
         self.__filtro_pais(FILTRO_PAIS)
         self.__filtro_retail(self.retails)
-        self.filtro_categoria(self.categorias)
-        self.filtro_marca(self.marcas)
+        self.__filtro_categoria(self.categorias)
+        self.__filtro_marca(self.marcas)
         self.set_fecha()
         self.obtener_click()
         print("Ahora estás listo para taxonomizar, te recomiendo el método .brand")
         print("Automaticamente te llenará los brand, sin mayor esfuerzo")
 
     def marketplace(self):
-        """Get ready for action marketplace"""
-        self.taxonomia_taxonomizado_click()
+        """ Get ready for action marketplace """
+        # self.__taxonomia_taxonomizado_click()
+        self.__nav_click('taxonomia', 'taxonomizado')
         self.__filtro_pais(FILTRO_PAIS)
         self.__filtro_retail(self.retails)
-        self.filtro_area(FILTRO_AREA)
-        self.filtro_division()
-        self.filtro_categoria(self.categorias)
+        self.__filtro_area(FILTRO_AREA)
+        self.__filtro_division()
+        self.__filtro_categoria(self.categorias)
         self.obtener_click()
         print("HOPE: Ahora estás listo para Marketplacear, te recomiendo el método .fill_market()")
 
@@ -383,7 +381,7 @@ class Hope:
 
 
     def brand(self, marcas=None):
-        """Llenar los brand automaticamente, para filtros especificos"""
+        """ Llenar los brand automaticamente, para filtros especificos """
         if marcas is None:
             marcas = self.marcas
         # brands = self.driver.find_elements("css selector", 'td[field="brand"] input')
@@ -420,15 +418,5 @@ class Hope:
 # ------------------------Welcome-MAIN-----------------------------
 if __name__ == '__main__':
     hope = Hope()
-    #approach 2
-    hope.marketplace()
+    hope.taxonomizar()
     os.system('pause')
-    hope.fill_market()
-    os.system('pause')
-    #para los botones editar
-    #search = d.find_element('css selector', "div[tabindex='0']")
-    #feature 5 seleccionar
-    #search = d.find_element("css selector", 'input[placeholder="Feature 5"]')
-    #search.click()
-    #search.send_keys(Keys.CONTROL + 'a') #seleccionar todo
-    #texto = search.get_attribute("value") #obtenemos el valor de la seleccion

@@ -83,7 +83,7 @@ def datos_smarphones(url):
 
 
 if __name__ == '__main__':
-    URL = "https://www.oechsle.pe/monitor-aoc-35---uwqhd-curvo-gaming-agon-ag353ucg-1000156669/p"
+    URL = "https://www.oechsle.pe/olla-arrocera-mult-rec-clombl4-2-c-vap-1000152391/p"
 
     datos = datos_smarphones(URL)
     for clave, valor in datos.items():
