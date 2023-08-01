@@ -1,7 +1,7 @@
 """Welcome to HopeBot, this is the last hope project"""
 import os
 import time
-from webdriver_manager.chrome import ChromeDriverManager #para descargar por code el Driver
+# from webdriver_manager.chrome import ChromeDriverManager #para descargar por code el Driver
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
@@ -18,13 +18,14 @@ AZUL = "\33[1;36m"  # texto azul claro
 GRIS = "\33[0;37m"  # texto gris
 BLANCO = "\33[1;37m"  # texto blanco
 ROJO = "\33[1;31m"
+VERDE = "\33[1;32m"
 
 class Hope:
     """ Clase que representa el bot de 'The last hope project' """
     def __init__(self):
         os.system('cls')
-        print("\n\nBienvenido a The last Hope Project, un bot asistente"
-              " que puede ser tu ultima esperanza...", end='\n\n')
+        # print("\n\nBienvenido a The last Hope Project, un bot asistente"
+            #   " que puede ser tu ultima esperanza...", end='\n\n')
         # VARIABLES
         self.retails = FILTRO_RETAIL
         self.categorias = FILTRO_CATEGORIA
@@ -34,11 +35,10 @@ class Hope:
 
         self.finder = finder.Finder()
         # end VARIABLES
-
-        # ruta_driver = r'C:\Program Files (x86)\chromedriver.exe'
+        ruta_driver = r'C:\Program Files (x86)\chromedriver.exe'
         # Instalación de ChromeDriver, devuelve la ruta completa
         # (si ya esta instalado solo devuelve la ruta)
-        ruta_driver = ChromeDriverManager(path="./chromedriver").install()
+        # ruta_driver = ChromeDriverManager(path="./chromedriver").install()
         # Creamos y asignamos la variable a un objeto Service que contiene la ruta del webdriver
         driver_service = Service(ruta_driver)
         # Establecer las opciones del navegador
@@ -128,18 +128,65 @@ class Hope:
             self.driver.get(f"https://to-platform-v2-pd.lexartlabs.com/#/{section}/{item}")
 
     def __filtro_pais(self, pais=FILTRO_PAIS):
-        """LLenado del filtro pais"""
-        search = self.driver.find_element(
-            "css selector", "div.custom-dropdown")
-        search.click()
+        """ LLenado del filtro pais """
+        self.driver.find_element(
+            "css selector", "div.custom-dropdown").click()
         try:
-            search = self.wait.until(ec.element_to_be_clickable(
-                ("xpath", f"//li[@aria-label='{pais}']")))
+            self.wait.until(ec.element_to_be_clickable(
+                ("xpath", f"//li[@aria-label='{pais}']"))).click()
         except TimeoutException:
-            print(f"fitro {pais} no cargó")
+            print(f"{AZUL}Hope: {ROJO} No se puedo autocompletar el fitro = '{pais}'")
             return -1
-        search.click()
         return 1
+
+    def __filtro_retail(self, retails=None):
+        """LLenado del filtro retail"""
+        if retails is None:
+            retails = self.retails
+        self.driver.find_element("css selector", "div.p-multiselect-label").click()
+        for retail in retails:
+            try:
+                self.wait.until(ec.element_to_be_clickable(
+                    ("xpath", f"//li[@aria-label='{retail}']"))).click()
+            except TimeoutException:
+                print(f"{AZUL}Hope: {ROJO} No se puedo autocompletar el fitro = '{retail}'")
+                return -1
+        self.driver.find_element(
+            "css selector", "div.p-multiselect-label").click()
+        return 1
+
+    def __filtro_categoria(self, categorias=None):
+        """Llenado del filtro categorias"""
+        if categorias is None:
+            categorias = self.categorias
+        self.driver.find_elements("css selector", "div.p-multiselect-label")[1].click()
+        for categoria in categorias:
+            try:
+                self.wait.until(ec.element_to_be_clickable(
+                    ("xpath", f"//li[@aria-label='{categoria}']"))).click()
+            except TimeoutException:
+                print(f"fitro {categoria} no cargó")
+                return -1
+        self.driver.find_elements("css selector", "div.p-multiselect-label")[1].click()
+        return 1
+
+    # def __filtro_marca(self, marcas = None):
+    #     """Llenado del filtro marcas"""
+    #     if marcas is None:
+    #         marcas = self.marcas
+    #     search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
+    #     search.click()
+    #     for marca in marcas:
+    #         try:
+    #             search = self.wait.until(ec.element_to_be_clickable(
+    #                 ("xpath", f"//li[@aria-label='{marca}']")))
+    #             search.click()
+    #         except TimeoutException:
+    #             print(f"fitro {marca} no cargó")
+    #             return -1
+    #     search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
+    #     search.click()
+    #     return 1
 
     def __filtro_area(self, areas=None):
         """LLenado del filtro areas"""
@@ -173,62 +220,6 @@ class Hope:
             return -1
         search.click()
         return 1
-
-    def __filtro_retail(self, retails=None):
-        """LLenado del filtro retail"""
-        if retails is None:
-            retails = self.retails
-        self.driver.find_element("css selector", "div.p-multiselect-label").click()
-        for retail in retails:
-            try:
-                search = self.wait.until(ec.element_to_be_clickable(
-                    ("xpath", f"//li[@aria-label='{retail}']")))
-                # search = self.driver.find_element(
-                #     "xpath", f"//li[@aria-label='{retail}']")
-                search.click()
-            except TimeoutException:
-                print(f"fitro {retail} no cargó")
-                return -1
-        search = self.driver.find_element(
-            "css selector", "div.p-multiselect-label")
-        search.click()
-        return 1
-
-    def __filtro_categoria(self, categorias=None):
-        """Llenado del filtro categorias"""
-        if categorias is None:
-            categorias = self.categorias
-        search = self.driver.find_elements("css selector", "div.p-multiselect-label")[1]
-        search.click()
-        for categoria in categorias:
-            try:
-                search = self.wait.until(ec.element_to_be_clickable(
-                    ("xpath", f"//li[@aria-label='{categoria}']")))
-                search.click()
-            except TimeoutException:
-                print(f"fitro {categoria} no cargó")
-                return -1
-        search = self.driver.find_elements("css selector", "div.p-multiselect-label")[1]
-        search.click()
-        return 1
-
-    # def __filtro_marca(self, marcas = None):
-    #     """Llenado del filtro marcas"""
-    #     if marcas is None:
-    #         marcas = self.marcas
-    #     search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
-    #     search.click()
-    #     for marca in marcas:
-    #         try:
-    #             search = self.wait.until(ec.element_to_be_clickable(
-    #                 ("xpath", f"//li[@aria-label='{marca}']")))
-    #             search.click()
-    #         except TimeoutException:
-    #             print(f"fitro {marca} no cargó")
-    #             return -1
-    #     search = self.driver.find_elements("css selector", "div.p-multiselect-label")[2]
-    #     search.click()
-    #     return 1
 
     def set_fecha(self):
         """Seteamos fecha inicio y fecha final"""
@@ -275,11 +266,16 @@ class Hope:
         """Obtenemos el driver"""
         return self.driver
 
-    def taxonomizar(self):
+    def taxonomizar(self, custom=None):
         """Get ready for action Smartphones samsung"""
         self.__nav_click('taxonomia', 'pendiente')
         self.__filtro_pais(FILTRO_PAIS)
-        self.__filtro_retail(self.retails)
+        if custom is None:
+            self.__filtro_retail(["plazavea", "tottus", "metro", "simple-ripley", "falabella-pe",
+                    "lacuracao-pe", "oechsle-pe", "efe-pe", "hiraoka-pe", "sodimac-pe",
+                    "carsa-pe", "lg", "tailoy-pe", "coolbox-pe"])
+        elif custom is True:
+            self.__filtro_retail()
         self.__filtro_categoria(self.categorias)
         self.set_fecha()
         self.obtener_click()
@@ -395,14 +391,13 @@ class Hope:
                     self.driver.find_elements("css selector", 'td[field="brand"] input'),
                     self.driver.find_elements('css selector', 'tbody tr')):
                 brand.click()
-                print(valor.text)
                 brand.send_keys(valor.text)
                 try:
                     wait = WebDriverWait(self.driver, 3)
                     search = wait.until(ec.element_to_be_clickable(
                         ("xpath", f"//ul/li[contains(@class, 'p-autocomplete-item') and text() = ' {valor.text} ']"))) # pylint: disable=C0301
                 except TimeoutException:
-                    print(f"{AZUL}HOPE: {ROJO}No tiene automcopletar o no coincide con el de la web{GRIS}\n") # pylint: disable=C0301
+                    print(f"{AZUL}HOPE: {ROJO}'{valor.text}' no tiene automcopletar o no coincide con el de la web{GRIS}\n") # pylint: disable=C0301
                     self.driver.execute_script("arguments[0].style.color = 'red';"
                                                    "arguments[0].style.fontWeight = '900';",
                                     row.find_element('css selector', 'td[field="nombre"]'))
@@ -411,7 +406,8 @@ class Hope:
                     self.driver.execute_script("arguments[0].style.color = 'green';"
                                                    "arguments[0].style.fontWeight = '900';",
                                     row.find_element('css selector', 'td[field="nombre"]'))
-            print(f"{AZUL}HOPE: {BLANCO}Listo ahi tienes el brand hecho, moderfoca{GRIS}")
+                    print(f"{AZUL}HOPE: {VERDE}Autocompletado con = {valor.text} {GRIS}\n") # pylint: disable=C0301
+            print(f"{AZUL}HOPE: {BLANCO}Listo ahi tienes el brand hecho{GRIS}")
 
     def brand_marca(self, marcas=None):
         """ Llenar los brand automaticamente, para filtros especificos """
