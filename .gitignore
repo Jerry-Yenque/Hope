@@ -1,0 +1,8 @@
+__pycache__/
+env/
+.env
+hope.egg-info/
+/*.js
+/*.csv
+/*.json 
+/*.html
