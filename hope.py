@@ -106,8 +106,9 @@ class Hope:
         # self.wait.until(ec.presence_of_element_located(("css selector", tablaSelector)))
 
 
-        self.wait.until(ec.url_changes(os.getenv("LOGIN")))
-
+        # self.wait.until(ec.url_changes(f"{os.getenv("LOGIN")}/abm/area"))
+        tableSelector = "body > div > div.wrapper > div.main-panel > div > div > div:nth-child(1) > div"
+        self.wait.until(ec.presence_of_element_located(("css selector", tableSelector)))
         # Captura el token desde el localStorage (si se guarda ahí)
         self.token = self.driver.execute_script("return localStorage.getItem('http_token');")
         print(f'Token: {self.token}')

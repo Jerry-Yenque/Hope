@@ -14,13 +14,14 @@ from nltk.corpus import stopwords
 import nltk
 from nltk.tokenize import word_tokenize
 from presentation.theme import AZUL, ROJO, VERDE, BLANCO, GRIS
+from datetime import datetime
 load_dotenv()
 
 try:
     stopwords.words('spanish')
 except LookupError:
     nltk.download('stopwords')
-    
+
 features_1 = {
     "ON EAR" : 626,
     "OVER EAR" : 628,
@@ -126,7 +127,8 @@ def find_best_match(title, products):
 def getProductCardNames(token: str, toPage: int):
     base_url = os.getenv("HOST")
     api = TaxonomyApi(base_url, token)
-
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    print(f"current day: {current_date}")
     # body = {
     # "order_by": "id",
     # #"name": "LENOVO",  # para buscar por nombre activa ese campo
