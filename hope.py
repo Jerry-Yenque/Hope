@@ -440,13 +440,16 @@ class Hope:
                     self.driver.find_elements("css selector", 'td[field="brand"] div.p-chip-text'),
                     self.driver.find_elements("css selector", 'td[field="brand"] input'),
                     self.driver.find_elements('css selector', 'tbody tr')):
+                text = str(valor.text)
                 brand.click()
-                brand.send_keys(valor.text)
+                brand.send_keys(text)
                 try:
                     # wait = WebDriverWait(self.driver, 3)  
                     self.changeWait(3)
+                    if (text == "BEATS"):
+                        text = "BEATS BY DR.DRE"
                     search = self.wait.until(ec.element_to_be_clickable(
-                        ("xpath", f"//ul/li[contains(@class, 'p-autocomplete-item') and text() = ' {valor.text} ']"))) # pylint: disable=C0301
+                        ("xpath", f"//ul/li[contains(@class, 'p-autocomplete-item') and text() = ' {text} ']"))) # pylint: disable=C0301
                 except TimeoutException:
                     print(f"{AZUL}HOPE: {ROJO}'{valor.text}' no tiene automcopletar o no coincide con el de la web{GRIS}\n") # pylint: disable=C0301
                     self.driver.execute_script("arguments[0].style.color = 'red';"
@@ -493,21 +496,23 @@ class Hope:
                         name_input))
                     # search.click()
                     search.send_keys(self.names[i])
+                    row.click()
                     
                 except TimeoutException:
                     print(f"{AZUL}HOPE: {ROJO}'valor.text' no tiene automcopletar o no coincide con el de la web{GRIS}\n") # pylint: disable=C0301
-                    self.driver.execute_script("arguments[0].style.color = 'red';"
-                                                "arguments[0].style.fontWeight = '900';",
-                                    row.find_element('css selector', f'body > div > div.wrapper > div.main-panel > div > div > div:nth-child(2) > div > table > tbody > tr:nth-child({i}) > td.sticky-2.sticky-2-moved'))
+                    # self.driver.execute_script("arguments[0].style.color = 'red';"
+                    #                             "arguments[0].style.fontWeight = '900';",
+                    #                 row.find_element('css selector', f'body > div > div.wrapper > div.main-panel > div > div > div:nth-child(2) > div > table > tbody > tr:nth-child({i}) > td.sticky-2.sticky-2-moved'))
                                     # row.find_element('css selector', 'td[field="nombre"]'))
                 else:
                     # search.click()
-                    self.driver.execute_script("arguments[0].style.color = 'green';"
-                                                "arguments[0].style.fontWeight = '900';",
-                                    row.find_element('css selector', 'td[field="nombre"]'))
+                    # self.driver.execute_script("arguments[0].style.color = 'green';"
+                    #                             "arguments[0].style.fontWeight = '900';",
+                    #                 row.find_element('css selector', 'td[field="nombre"]'))
                     print(f"{AZUL}HOPE: {VERDE}Autocompletado con = 'valor.text' {GRIS}\n") # pylint: disable=C0301
                 i += 1
-            print(f"{AZUL}HOPE: {BLANCO}Listo ahi tienes el brand hecho{GRIS}")
+            self.names = self.names[20:]
+            print(f"{AZUL}HOPE: {BLANCO}Quedan {len(self.names)} audífonos  .{GRIS}")
         self.resetWait()
 
     def changeWait(self, time: float):
