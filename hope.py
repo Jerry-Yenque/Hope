@@ -35,12 +35,6 @@ TAXONOMIA_ON_SIDE_BAR = "2"
 
 PENDIENTE_ON_TAXONOMIA_SIDE_BAR = "1"
 
-def cls():
-        import os
-        os.system('cls')
-
-
-
 # To activate the virtual enviroment type this: .\env\Scripts\activate or only activate can work
 
 class Hope:
@@ -111,10 +105,16 @@ class Hope:
         self.wait.until(ec.presence_of_element_located(("css selector", tableSelector)))
         # Captura el token desde el localStorage (si se guarda ahí)
         self.token = self.driver.execute_script("return localStorage.getItem('http_token');")
-        print(f'Token: {self.token}')
+        # print(f'Token: {self.token}')
+        self.speak(f"Este es tu token {self.token}")
+
+    def speak(self, msg: str):
+        print(f"{AZUL}{PROJECT}: {BLANCO}{msg}{GRIS}")
 
     def getToken(self):
         return self.driver.execute_script("return localStorage.getItem('http_token');")
+    def cls(self):
+        os.system('cls')
 
     def audifonos(self): # it was called taxonomizar()
         """Get ready for action Smartphones samsung"""
