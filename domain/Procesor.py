@@ -183,8 +183,8 @@ def getProductCardNames(token: str, toPage: int):
     "SAMSUNG",
     "SAMSUNG (AKG)"
   ],
-  "start_date": "2024-07-01",
-  "end_date": "2025-01-01",
+  "start_date": "2025-01-01",
+  "end_date": current_date,
   "name": None,
   "last_seen_products": False
 }
