@@ -16,6 +16,11 @@ from nltk.tokenize import word_tokenize
 from presentation.theme import AZUL, ROJO, VERDE, BLANCO, GRIS
 load_dotenv()
 
+try:
+    stopwords.words('spanish')
+except LookupError:
+    nltk.download('stopwords')
+    
 features_1 = {
     "ON EAR" : 626,
     "OVER EAR" : 628,
@@ -84,7 +89,7 @@ def find_product_by_name(best_match, headphones):
     return clean_dict
 
 def normalize_text(text):
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
     # return re.sub(r'\W+', ' ', text).strip().lower()  # this line was the unique in this function 
     spanish_stopwords = set(stopwords.words('spanish'))
 
