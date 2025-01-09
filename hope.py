@@ -11,7 +11,7 @@ from src.helpers import DropdownConstant
 from src.config import FILTRO_PAIS, FILTRO_RETAIL, FILTRO_AREA , FILTRO_DIVISION, FILTRO_CATEGORIA, FILTRO_MARCA, FILTRO_RETAIL_MARKETPLACE # pylint: disable=C0301
 from src.data.finder import Finder
 from domain.Procesor import getPosibleNames
-from presentation.theme import AZUL, ROJO, VERDE, BLANCO, ROJO, GRIS
+from presentation.theme import AZUL, ROJO, VERDE, BLANCO, ROJO, GRIS, AMARILLO
 from infrastructure.WebDriverManager import WebDriverManager
 import threading
 load_dotenv()
@@ -81,7 +81,9 @@ class Hope:
     def reload(self):
         import importlib
         import hope
+        import presentation.theme
         importlib.reload(hope)
+        importlib.reload(presentation.theme)
         for name, method in hope.Hope.__dict__.items():
             if callable(method):
                 setattr(self, name, method.__get__(self, self.__class__))
@@ -278,86 +280,147 @@ class Hope:
         dropdownSelector: str = f"body > div > div.wrapper > div.main-panel > div > div > div.content-query > div > div:nth-child(2) > span:nth-child({dropdown}) > input"
         self.wait.until(ec.element_to_be_clickable(("css selector", dropdownSelector))).click()
         
-    def clickDropdownElement(self, key: str):
-        """ Clickea cualquier elemento de algún dropdown que tenga diga key, la funcion maneja el wait """
-        dropdownElementSelector = f"//*[normalize-space(text())='{key}']"
-        #//*[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = 'peru']
-
-        try:
-            # self.wait.until(ec.element_to_be_clickable(
-            #     ("xpath", f"//li[@aria-label='{key}']"))).click()
+    # @DEPRECATED 80/01/2025
+    # def clickDropdownElement(self, key: str):
+    #     """ Clickea cualquier elemento de algún dropdown que tenga diga key, la funcion maneja el wait """
+    #     dropdownElementSelector = f"//*[normalize-space(text())='{key}']"
+    #     #//*[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = 'peru']
+    #     try:
+    #         # self.wait.until(ec.element_to_be_clickable(
+    #         #     ("xpath", f"//li[@aria-label='{key}']"))).click()
+    #         self.wait.until(ec.element_to_be_clickable(
+    #             ("xpath", dropdownElementSelector))).click()
             
-            self.wait.until(ec.element_to_be_clickable(
-                ("xpath", dropdownElementSelector))).click()
-            
-        except TimeoutException:
-            print(f"{AZUL}{ROJO}      Tiempo para encontrar al elemento del dropdown con texto= '{key}' agotado{GRIS} ")
-            raise RuntimeError(f"El elemento {key} no cargó.")
+    #     except TimeoutException:
+    #         print(f"{AZUL}{ROJO}      Tiempo para encontrar al elemento del dropdown con texto= '{key}' agotado{GRIS} ")
+    #         raise RuntimeError(f"El elemento {key} no cargó.")
 
-        except StaleElementReferenceException:
-            print(f"{AZUL}{ROJO}      El elemento {key} se ocultó antes de poder clickearlo{GRIS}")
-            raise RuntimeError(f"El elemento {key} se ocultó antes de poder clickearlo")
+    #     except StaleElementReferenceException:
+    #         print(f"{AZUL}{ROJO}      El elemento {key} se ocultó antes de poder clickearlo{GRIS}")
+    #         raise RuntimeError(f"El elemento {key} se ocultó antes de poder clickearlo")
     
 
-    ### END DROPDOWNS
+    def clickDropdownElement(self, key: str, max_attempts=3, wait_time=4):
+        """ Clickea cualquier elemento de algún dropdown que diga key, manejando reintentos internos """
+        dropdownElementSelector = f"//*[normalize-space(text())='{key}']"
+        attempt = 0
+        self.changeWait(wait_time)
+        while attempt < max_attempts:
+            try:
+                self.wait.until(ec.element_to_be_clickable(("xpath", dropdownElementSelector))).click()
+                self.resetWait()
+                return  # Salir si el clic fue exitoso
+            except TimeoutException:
+                # print(f"{AZUL}{ROJO}      Tiempo para encontrar al elemento del dropdown con texto= '{key}' agotado{AMARILLO} (intento {attempt+1}/{max_attempts}).{GRIS}")
+                print(f"{AZUL}{ROJO}      Tiempo para encontrar la marca = '{key}' agotado{AMARILLO} (intento {attempt+1}/{max_attempts}).{GRIS}")
+            except StaleElementReferenceException:
+                print(f"{AZUL}{ROJO}      El elemento {key} se ocultó antes de poder clickearlo{AMARILLO} (intento {attempt+1}/{max_attempts}).")
+            
+            attempt += 1
+            if attempt < max_attempts:
+                print(f"{AZUL}{BLANCO}      Intentando una vez más para {key}{GRIS}")
+            else:
+                self.resetWait()
+                raise RuntimeError(f"{ROJO}No se pudo clickear el elemento {key} después de {max_attempts} intentos.{GRIS}")
 
-    def fillMarcas(self, marcas=None): #FILTRO_MARCA
-        if marcas == None:
+    
+
+    def fillMarcas(self, marcas=None):
+        """ Rellena marcas en el dropdown """
+        if marcas is None:
             marcas = self.marcas
         self.clickDropdown(DROPDOWN_MARCAS)
-        # loop para las diferentes marcas
-        # self.clickDropdownElement('SONY')
         self.changeWait(4)
         listNoProcessed = []
-        max_attempts = 3
         for key, value in marcas.items():
             self.SendDropdownMarcas(str(key))
+
             if isinstance(value, list):
                 print(f"{AZUL}{PROJECT}: {VERDE}{key}{BLANCO} contiene versiones{GRIS}")
-                try:
-                    for item in value:
-                        attempt = 0
-                        while attempt < max_attempts:
-                            try:
-                                self.clickDropdownElement(item)
-                                # print(f"{VERDE}      {item}: logrado*.{GRIS}")
-                                break
-                            except Exception:
-                                attempt += 1
-                                print(f"{AZUL}{BLANCO}      Intentando una vez más para {item}{GRIS}")
-                                if attempt < max_attempts:
-                                    self.SendDropdownMarcas("")
-                                else:
-                                    listNoProcessed.append(item)
-                                    print(f"{AZUL}{ROJO}      No se pudo procesar {item} después de {max_attempts} intentos{GRIS}")
-                                    # self.clickDropdownElement(item)
-                                    # print(f"{AZUL}{VERDE}      Logrado.{GRIS}")
-                            
-                except Exception:
-                    print(f"{AZUL}{BLANCO}{ROJO}      Error procesando las versiones de {key}\n{GRIS}")
-                else:
-                    # Se ejecuta si no se produjo ninguna excepción durante la iteración interna
-                    print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
-                finally:
-                    self.SendDropdownMarcas("")
+                all_processed = True  # Bandera para verificar si todos los elementos se procesaron
+                for item in value:
+                    try:
+                        self.clickDropdownElement(item)
+                    except RuntimeError:
+                        listNoProcessed.append(item)
+                        all_processed = False  # Indicar que hubo fallos
+                        print(f"{AZUL}{ROJO}      No se pudo procesar {item} después de los intentos{GRIS}")
 
+                if all_processed:
+                    print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
+                self.SendDropdownMarcas("")  # Limpia el input después de las versiones
             else:
                 print(f"{AZUL}{PROJECT}: {VERDE}{key}{BLANCO} es único")
                 try:
                     self.clickDropdownElement(value)
                     print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
-                except Exception:
-                    print(f"{AZUL}{BLANCO}      Intentando una vez más.{GRIS}")
-                    self.SendDropdownMarcas("")
-                    self.clickDropdownElement(value)
-                    print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
-                    # print("se manda a limpiar input")
-                    # self.SendDropdownMarcas("")
-                else:
-                    self.SendDropdownMarcas("")
+                except RuntimeError:
+                    listNoProcessed.append(value)
+                    print(f"No se pudo procesar {value} después de los reintentos.")
+                self.SendDropdownMarcas("")  # Limpia el input
 
         self.clickDropdown(DROPDOWN_MARCAS)
         self.resetWait()
+
+    # @DEPRECATED 08/01/2025
+    # def fillMarcas(self, marcas=None): #FILTRO_MARCA
+    #     if marcas == None:
+    #         marcas = self.marcas
+    #     self.clickDropdown(DROPDOWN_MARCAS)
+    #     # loop para las diferentes marcas
+    #     # self.clickDropdownElement('SONY')
+    #     self.changeWait(4)
+    #     listNoProcessed = []
+    #     max_attempts = 4
+    #     for key, value in marcas.items():
+    #         self.SendDropdownMarcas(str(key))
+    #         if isinstance(value, list):
+    #             print(f"{AZUL}{PROJECT}: {VERDE}{key}{BLANCO} contiene versiones{GRIS}")
+    #             try:
+    #                 for item in value:
+    #                     attempt = 0
+    #                     while attempt < max_attempts:
+    #                         try:
+    #                             self.clickDropdownElement(item)
+    #                             # print(f"{VERDE}      {item}: logrado*.{GRIS}")
+    #                             break
+    #                         except Exception:
+    #                             attempt += 1
+    #                             print(f"{AZUL}{BLANCO}      Intentando una vez más para {item}{GRIS}")
+    #                             if attempt < max_attempts:
+    #                                 self.SendDropdownMarcas("")
+    #                             else:
+    #                                 listNoProcessed.append(item)
+    #                                 print(f"{AZUL}{ROJO}      No se pudo procesar {item} después de {max_attempts} intentos{GRIS}")
+    #                                 # self.clickDropdownElement(item)
+    #                                 # print(f"{AZUL}{VERDE}      Logrado.{GRIS}")
+                            
+    #             except Exception:
+    #                 print(f"{AZUL}{BLANCO}{ROJO}      Error procesando las versiones de {key}\n{GRIS}")
+    #             else:
+    #                 # Se ejecuta si no se produjo ninguna excepción durante la iteración interna
+    #                 print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
+    #             finally:
+    #                 self.SendDropdownMarcas("")
+
+    #         else:
+    #             print(f"{AZUL}{PROJECT}: {VERDE}{key}{BLANCO} es único")
+    #             try:
+    #                 self.clickDropdownElement(value)
+    #                 print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
+    #             except Exception:
+    #                 print(f"{AZUL}{BLANCO}      Intentando una vez más.{GRIS}")
+    #                 self.SendDropdownMarcas("")
+    #                 self.clickDropdownElement(value)
+    #                 print(f"{AZUL}{VERDE}      Cargado sin problema.\n{GRIS}")
+    #                 # print("se manda a limpiar input")
+    #                 # self.SendDropdownMarcas("")
+    #             else:
+    #                 self.SendDropdownMarcas("")
+
+    #     self.clickDropdown(DROPDOWN_MARCAS)
+    #     self.resetWait()
+
 
     def brand(self):
         """ Llenar los brand automaticamente, para taxonomizado general """
@@ -504,7 +567,6 @@ class Hope:
     
     def setFecha(self):
         """Seteamos fecha inicio y fecha final"""
-
         self.changeWait(4)
         try:
             self.clickDropdown(DROPDOWN_TIMEPICKER_START)
