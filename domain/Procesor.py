@@ -242,30 +242,30 @@ def getPosibleNames(token: str):
     scraped_titles = getProductCardNames(token=token, toPage=1)
 
     df = []
-    i = 1
+    # i = 1
     # Procesar los títulos obtenidos
     for title in scraped_titles:
         best_match = find_best_match(title, standard_products)
         df.append(best_match)
 
-        color = extract_color(title)
-        if((i-1)%20 == 0):
-            print(f"{AZUL}Página: {(i+20)//20}{GRIS}")
+        # color = extract_color(title)
+        # if((i-1)%20 == 0):
+        #     print(f"{AZUL}Página: {(i+20)//20}{GRIS}")
         
-        if color != "No especificado":
-            print(f'{BLANCO}{i} - {AZUL}Contiene color {color}{GRIS}')
-        else:
-            print(f'{BLANCO}{i} - {ROJO}No contiene color{GRIS}')
+        # if color != "No especificado":
+        #     print(f'{BLANCO}{i} - {AZUL}Contiene color {color}{GRIS}')
+        # else:
+        #     print(f'{BLANCO}{i} - {ROJO}No contiene color{GRIS}')
 
-        title, product_match = paintOutput(title, best_match)
-        print(f"{BLANCO}Título: {title}{GRIS}")
-        if (i%2 == 1):
-            print(f"{AZUL}{product_match}{GRIS}")
-        else:
-            print(f"{BLANCO}{product_match}{GRIS}")
-        print(f"Color: {color}")
-        # product_to_taxonomy =  find_product_by_name(best_match, headphones)
-        i +=1
+        # title, product_match = paintOutput(title, best_match)
+        # print(f"{BLANCO}Título: {title}{GRIS}")
+        # if (i%2 == 1):
+        #     print(f"{AZUL}{product_match}{GRIS}")
+        # else:
+        #     print(f"{BLANCO}{product_match}{GRIS}")
+        # print(f"Color: {color}")
+        # # product_to_taxonomy =  find_product_by_name(best_match, headphones)
+        # i +=1
 
     return df
 

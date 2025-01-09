@@ -13,6 +13,7 @@ from src.data.finder import Finder
 from domain.Procesor import getPosibleNames
 from presentation.theme import AZUL, ROJO, VERDE, BLANCO, ROJO, GRIS
 from infrastructure.WebDriverManager import WebDriverManager
+import threading
 load_dotenv()
 PROJECT = "Hope"
 
@@ -87,6 +88,13 @@ class Hope:
         print("Métodos recargados")
 
     def loadNames(self):
+        thread = threading.Thread(target=self._load_names_task, daemon=True)
+        thread.start()
+        print("Cargando nombres en segundo plano...")
+        # self.names = getPosibleNames(self.token)
+
+    def _load_names_task(self):
+        # Esta tarea se ejecuta en un hilo separado
         self.names = getPosibleNames(self.token)
 
     def login(self, email=os.getenv("EMAIL"), clave=os.getenv("PASSWORD")):
