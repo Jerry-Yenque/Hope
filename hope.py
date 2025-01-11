@@ -1,19 +1,23 @@
-import os # undetected_chromedriver
-import time
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support.ui import WebDriverWait # para esperar por elementos en selenium
-from selenium.webdriver.support import expected_conditions as ec # para condiciones en selinium
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
-from dotenv import load_dotenv
-from src.helpers import DropdownConstant
-from src.config import FILTRO_PAIS, FILTRO_RETAIL, FILTRO_AREA , FILTRO_DIVISION, FILTRO_CATEGORIA, FILTRO_MARCA, FILTRO_RETAIL_MARKETPLACE # pylint: disable=C0301
-from src.data.finder import Finder
-from domain.Procesor import getPosibleNames
-from presentation.theme import AZUL, ROJO, VERDE, BLANCO, ROJO, GRIS, AMARILLO
-from infrastructure.WebDriverManager import WebDriverManager
+import hope
+import importlib
+import os  # undetected_chromedriver
 import threading
+import time
+from dotenv import load_dotenv
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as ec  # para condiciones en selinium
+from selenium.webdriver.support.ui import WebDriverWait  # para esperar por elementos en selenium
+from domain.Procesor import getPosibleNames
+from infrastructure.WebDriverManager import WebDriverManager
+import presentation
+from presentation.theme import AZUL, VERDE, BLANCO, ROJO, GRIS, AMARILLO
+from src.config import FILTRO_PAIS, FILTRO_RETAIL, FILTRO_AREA, FILTRO_DIVISION, FILTRO_CATEGORIA, FILTRO_MARCA, \
+    FILTRO_RETAIL_MARKETPLACE  # pylint: disable=C0301
+from src.data.finder import Finder
+from src.helpers import DropdownConstant
+
 load_dotenv()
 PROJECT = "Hope"
 
@@ -79,9 +83,8 @@ class Hope:
     
 
     def reload(self):
-        import importlib
-        import hope
-        import presentation.theme
+        load_dotenv(override=True)
+        # import presentation.theme
         importlib.reload(hope)
         importlib.reload(presentation.theme)
         for name, method in hope.Hope.__dict__.items():
@@ -500,6 +503,7 @@ class Hope:
                     
                 except TimeoutException:
                     print(f"{AZUL}HOPE: {ROJO}'valor.text' no tiene automcopletar o no coincide con el de la web{GRIS}\n") # pylint: disable=C0301
+                    raise RuntimeError("plop")
                     # self.driver.execute_script("arguments[0].style.color = 'red';"
                     #                             "arguments[0].style.fontWeight = '900';",
                     #                 row.find_element('css selector', f'body > div > div.wrapper > div.main-panel > div > div > div:nth-child(2) > div > table > tbody > tr:nth-child({i}) > td.sticky-2.sticky-2-moved'))

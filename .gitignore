@@ -6,3 +6,4 @@ hope.egg-info/
 /*.csv
 /*.json 
 /*.html
+.idea
