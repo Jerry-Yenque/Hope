@@ -1,4 +1,4 @@
-import mongoConnection
+import mongo
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import importlib
@@ -23,19 +23,19 @@ class MongoConnection:
     def reload(self):
         """ A beauty method to reload the instance """
         os.system('cls')
-        importlib.reload(mongoConnection)
+        importlib.reload(mongo)
 
         # Limpiar métodos antiguos
         existing_methods = list(self.__dict__.keys())
         # print(f"{BLANCO}Methods of current instance: {existing_methods}{GRIS}")
         # print(f"{AZUL}Methods of updated version: {list(mongoConnection.MongoConnection.__dict__.keys())}{GRIS}")
         for method_name in existing_methods:
-            if method_name not in mongoConnection.MongoConnection.__dict__.keys():
+            if method_name not in mongo.MongoConnection.__dict__.keys():
                 print(f"{ROJO}Deleting method: {method_name}(){GRIS}")
                 delattr(self, method_name)
 
         # Actualizar métodos de la clase
-        for name, method in mongoConnection.MongoConnection.__dict__.items():
+        for name, method in mongo.MongoConnection.__dict__.items():
             if callable(method):
                 if name not in existing_methods:
                     print(f"{VERDE}Adding method: {name}(){GRIS}")
