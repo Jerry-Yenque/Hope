@@ -1,26 +1,24 @@
-import re
-from fuzzywuzzy import fuzz, process
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from src.data.api.taxonomyApi import TaxonomyApi
-import csv
-from pymongo import MongoClient
+import re
+from datetime import datetime
+
+import nltk
 import requests
 from dotenv import load_dotenv
-from src.data.model.Product import Product
-from src.data.model.Feature import Feature
+from fuzzywuzzy import fuzz, process
 from nltk.corpus import stopwords
-import nltk
 from nltk.tokenize import word_tokenize
+from infrastructure.mongo import MongoConnection
 from presentation.theme import AZUL, ROJO, VERDE, BLANCO, GRIS
-from datetime import datetime
-load_dotenv()
-
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.data.api.taxonomyApi import TaxonomyApi
+from src.data.model.Feature import Feature
+from src.data.model.Product import Product
 try:
     stopwords.words('spanish')
 except LookupError:
     nltk.download('stopwords')
+load_dotenv()
 
 features_1 = {
     "ON EAR" : 626,
@@ -37,11 +35,11 @@ features_3 = {
 }
 
 
-client = MongoClient(os.getenv("MONGO_HOST"))
+db = MongoConnection()
 
 # Seleccionar la base de datos y la colección
-db = client['ThirdEye']  # Reemplaza con el nombre de tu base de datos
-collection = db['headphones']
+# db = client['ThirdEye']  # Reemplaza con el nombre de tu base de datos
+collection = db.get_collection('headphones')
 
 def getHeadphonesNames():
     # Consultar los datos necesarios
@@ -58,7 +56,7 @@ def getHeadphonesNames():
             feature_3: int = document.get('feature_3')
             feature_4: int = document.get('feature_4')
             feature_5: int = document.get('feature_5')
-            
+
             if name:
                 standard_products.add(name)
             if name != '' and feature_1 in features_1.values() and feature_2 in features_2.values() and feature_3 in features_3.values() and feature_4 == None and feature_5 == None:
@@ -72,6 +70,7 @@ def getHeadphonesNames():
     #     print(f'{i.name}')
     headphones = list(headphones)
     return standard_products, headphones
+
 
 def get_key_from_value(dictionary, value):
     """ Obten el nombre del Feature/1/2/3 dándole el código, none si no está"""

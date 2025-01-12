@@ -9,7 +9,6 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec  # para condiciones en selinium
 from selenium.webdriver.support.ui import WebDriverWait  # para esperar por elementos en selenium
-from domain.Procesor import getPosibleNames
 from infrastructure.WebDriverManager import WebDriverManager
 import presentation
 from presentation.theme import AZUL, VERDE, BLANCO, ROJO, GRIS, AMARILLO
@@ -17,6 +16,7 @@ from src.config import FILTRO_PAIS, FILTRO_RETAIL, FILTRO_AREA, FILTRO_DIVISION,
     FILTRO_RETAIL_MARKETPLACE  # pylint: disable=C0301
 from src.data.finder import Finder
 from src.helpers import DropdownConstant
+from di.appContainer import AppContainer
 
 load_dotenv()
 PROJECT = "Hope"
@@ -42,11 +42,13 @@ PENDIENTE_ON_TAXONOMIA_SIDE_BAR = "1"
 
 # To activate the virtual enviroment type this: .\env\Scripts\activate or only activate can work
 
+
 class Hope:
     """ Clase que representa el bot de 'The last hope project' """
     def __init__(self):
         os.system('cls')
         # VARIABLES
+        self.container = AppContainer()
         self.driver_manager = WebDriverManager()
         self.driver = self.driver_manager.create_driver()
         self.retails = FILTRO_RETAIL
@@ -100,7 +102,8 @@ class Hope:
 
     def _load_names_task(self):
         # Esta tarea se ejecuta en un hilo separado
-        self.names = getPosibleNames(self.token)
+        # self.names = getPosibleNames(self.token)
+        self.names = self.container.headphone_repository.get_posible_names(self.token)
 
     def login(self, email=os.getenv("EMAIL"), clave=os.getenv("PASSWORD")):
         """ Acceso automatico """
